@@ -1,0 +1,39 @@
+---
+-
+  hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    list:
+        - { hostname: OCSBAINFPL01, ipaddr: 100.65.125.11, cmk_alias: Prod INFM App 1" }
+        - { hostname: OCSBAINFPL02, ipaddr: 100.65.125.12, cmk_alias: Prod INFM App 2" }
+        - { hostname: OCSBACRUPL01, ipaddr: 100.65.125.13, cmk_alias: NFS Server" }
+        - { hostname: OCSBAINFNL01, ipaddr: 100.65.125.14, cmk_alias: Dev INFM App 1" }
+        - { hostname: OCSBAIBMPW01, ipaddr: 100.65.125.15, cmk_alias: Prod IBM Master" }
+        - { hostname: OCSBAIBMPW02, ipaddr: 100.65.125.16, cmk_alias: Prod IBM Web" }
+        - { hostname: OCSBAAMAPL01, ipaddr: 100.65.125.17, cmk_alias: Prod Analytics" }
+        - { hostname: OCSBASASPL01, ipaddr: 100.65.125.18, cmk_alias: Dev Analytics" }
+        - { hostname: OCVCUBOBPW01, ipaddr: 100.65.125.67, cmk_alias: Prod VCU Reporting" }
+        - { hostname: OCVCUADOPL01, ipaddr: 100.65.125.19, cmk_alias: Prod VCU Camp" }
+        - { hostname: OCJNJUNIPL01, ipaddr: 100.65.125.20, cmk_alias: Prod JNJ Camp" }
+        - { hostname: OCABBUNIPL01, ipaddr: 100.65.125.21, cmk_alias: Prod Abbv Camp" }
+        - { hostname: OCCVSBOBPW01, ipaddr: 100.65.125.68, cmk_alias: Prod CVS Reporting" }
+        - { hostname: OCCVSUNIPL01, ipaddr: 100.65.125.22, cmk_alias: Prod CVS Camp" }
+        - { hostname: OCUCBBOBPW01, ipaddr: 100.65.125.69, cmk_alias: Prod UBS Reporting" }
+        - { hostname: OCUCBUNIPL01, ipaddr: 100.65.125.23, cmk_alias: Prod UBS Camp" }
+        - { hostname: OCASTUNIPL01, ipaddr: 100.65.125.24, cmk_alias: Prod AST Camp" }
+        - { hostname: OCSBAFTPPW01, ipaddr: 100.65.125.83, cmk_alias: FTP Server" }
+        - { hostname: OCSBAJMPPW01, ipaddr: 100.65.125.130, cmk_alias: Jump Server 1" }
+        - { hostname: OCCINJMPPW01, ipaddr: 100.65.125.131, cmk_alias: Jump Server 2" }
+        - { hostname: OCCINMONPL01, ipaddr: 100.65.125.132, cmk_alias: Monitoring Server" }
+  tasks:
+    -
+      name: delete hosts
+      shell: |
+        curl "http://100.78.141.132:5000/cmk_central/check_mk/webapi.py?action=delete_host&_username=automation&_secret=$(cat /omd/sites/cmk_central/var/check_mk/web/automation/automation.secret)" -d 'request={"hostname":"{{ item.hostname }}"}'
+      loop: "{{ list }}"
+
+    -
+      name: activate affected
+      shell: |
+        curl "http://100.78.141.132:5000/cmk_central/check_mk/webapi.py?action=activate_changes&_username=automation&_secret=$(cat /omd/sites/cmk_central/var/check_mk/web/automation/automation.secret)" -d 'request={"sites":["cmk_central"]}'
