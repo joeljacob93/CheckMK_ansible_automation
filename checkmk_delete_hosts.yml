@@ -1,0 +1,39 @@
+---
+-
+  hosts: localhost
+  connection: local
+  become: yes
+  vars:
+    list:
+        - { hostname: TBOCTBAINFPL01, ipaddr: 100.78.140.11, cmk_alias: Prod Informatica App 1" }
+        - { hostname: TBOCTBAINFPL02, ipaddr: 100.78.140.12, cmk_alias: Prod Informatica App 2" }
+        - { hostname: TBOCTBACRUPL01, ipaddr: 100.78.140.13, cmk_alias: Prod Informatica NFS Server" }
+        - { hostname: TBOCTBAINFNL01, ipaddr: 100.78.140.14, cmk_alias: Dev Informatica App 1" }
+        - { hostname: TBOCTBATIDPW01, ipaddr: 100.78.140.15, cmk_alias: Prod Tidal Master" }
+        - { hostname: TBOCTBATIDPW02, ipaddr: 100.78.140.16, cmk_alias: Prod Tidal Web" }
+        - { hostname: TBOCTBAAMAPL01, ipaddr: 100.78.140.17, cmk_alias: SAS Analytics" }
+        - { hostname: TBOCTBASASPL01, ipaddr: 100.78.140.18, cmk_alias: SAS Analytics 2" }
+        - { hostname: TBOCVCABOBPW01, ipaddr: 100.78.140.67, cmk_alias: Prod VCA Reporting" }
+        - { hostname: TBOCVCAADOPL01, ipaddr: 100.78.140.19, cmk_alias: Prod VCA Campaign" }
+        - { hostname: TBOCPGEUNIPL01, ipaddr: 100.78.140.20, cmk_alias: Prod PGE Campaign" }
+        - { hostname: TBOCABBUNIPL01, ipaddr: 100.78.140.21, cmk_alias: Prod Abbott Campaign" }
+        - { hostname: TBOCGSKBOBPW01, ipaddr: 100.78.140.68, cmk_alias: Prod GSK Reporting" }
+        - { hostname: TBOCGSKUNIPL01, ipaddr: 100.78.140.22, cmk_alias: Prod GSK Campaign" }
+        - { hostname: TBOCUCBBOBPW01, ipaddr: 100.78.140.69, cmk_alias: Prod UCB Reporting" }
+        - { hostname: TBOCUCBUNIPL01, ipaddr: 100.78.140.23, cmk_alias: Prod UCB Campaign" }
+        - { hostname: TBOCASTUNIPL01, ipaddr: 100.78.140.24, cmk_alias: Prod Astellas Campaign" }
+        - { hostname: TBOCTBAFTPPW01, ipaddr: 100.78.140.83, cmk_alias: MOVEit" }
+        - { hostname: TBOCTBAJMPPW01, ipaddr: 100.78.141.130, cmk_alias: Targetbase Jump Server " }
+        - { hostname: TBOCCINJMPPW01, ipaddr: 100.78.141.131, cmk_alias: Cintra Jump Server " }
+        - { hostname: TBOCCINMONPL01, ipaddr: 100.78.141.132, cmk_alias: Cintra Monitoring Server" }
+  tasks:
+    -
+      name: delete hosts
+      shell: |
+        curl "http://100.78.141.132:5000/targetbase/check_mk/webapi.py?action=delete_host&_username=automation&_secret=$(cat /omd/sites/targetbase/var/check_mk/web/automation/automation.secret)" -d 'request={"hostname":"{{ item.hostname }}"}'
+      loop: "{{ list }}"
+
+    -
+      name: activate affected
+      shell: |
+        curl "http://100.78.141.132:5000/targetbase/check_mk/webapi.py?action=activate_changes&_username=automation&_secret=$(cat /omd/sites/targetbase/var/check_mk/web/automation/automation.secret)" -d 'request={"sites":["targetbase"]}'

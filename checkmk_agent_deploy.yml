@@ -1,0 +1,66 @@
+---
+-
+  hosts: exacs
+  become: yes
+  tasks:
+    -
+      name: install the latest version of xinetd
+      yum:
+        name: xinetd
+        state: latest
+    -
+      name: start and enable xinetd service
+      systemd:
+        name: xinetd
+        state: started
+        enabled: yes
+
+    -
+      service_facts:
+    -
+      name: Checking xinetd status facts
+      debug:
+        var: ansible_facts.services["xinetd.service"]
+
+    -
+      name: Copy check_mk agent rpm to server
+      copy:
+        src: /tmp/check-mk-agent-1.6.0p11-1.noarch.rpm
+        dest: /tmp/check-mk-agent-1.6.0p11-1.noarch.rpm
+    -
+      name: Install agent rpm.
+      yum:
+        name: /tmp/check-mk-agent-1.6.0p11-1.noarch.rpm
+        state: present
+
+#    -
+#      name: Enable cmk agent traffic on 6556/tcp port and reload firewall-cmd
+#      firewalld:
+#        port: 6556/tcp
+#        permanent: yes
+#        state: enabled
+#        immediate: yes
+
+#    -
+#      name: Enable cmk_agent traffic on 6556/tcp port and reload firewall-cmd
+#      shell: |
+#        firewall-cmd --add-port=6556/tcp --permanent
+#        sleep 1
+#        firewall-cmd --reload
+#      register: firewall_out
+#    -
+#      name: debug firewall status
+#      debug: "msg=\"{{firewall_out.stdout}}\""
+
+
+    -
+      name: Run check_mk_agent
+      shell: |
+        check_mk_agent | head
+      register: agent_out
+    -
+      name: debug check_mk_agent status
+      debug: "msg=\"{{agent_out.stdout}}\""
+
+
+
